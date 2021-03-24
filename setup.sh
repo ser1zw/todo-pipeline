@@ -4,22 +4,22 @@ oc login -u admin -p admin
 sleep 3
 
 oc apply -f yaml/00_install_tekton.yaml
-sleep 10
+sleep 30
 
 oc new-project ogwtest
-sleep 3
+sleep 10
 
 oc create -f yaml/01_apply_manifest_task.yaml
-sleep 3
+sleep 10
 
 oc create -f yaml/02_update_deployment_task.yaml
-sleep 3
+sleep 10
 
 oc create -f yaml/03_persistent_volume_claim.yaml
-sleep 3
+sleep 10
 
 oc create -f yaml/04_pipeline.yaml
-sleep 3
+sleep 30
 
 tkn pipeline start build-and-deploy \
   -w name=shared-workspace,claimName=source-pvc \
@@ -27,7 +27,7 @@ tkn pipeline start build-and-deploy \
 	-p git-url=https://github.com/ser1zw/todo.git \
 	-p git-revision=main \
 	-p IMAGE=image-registry.openshift-image-registry.svc:5000/ogwtest/todo-api
-sleep 30
+sleep 120
 
 oc new-app postgresql-ephemeral \
   -p NAMESPACE=openshift \
@@ -36,8 +36,9 @@ oc new-app postgresql-ephemeral \
   -p POSTGRESQL_PASSWORD=postgres \
   -p POSTGRESQL_DATABASE=todo-db \
   -p POSTGRESQL_VERSION=latest
-sleep 30
+sleep 60
 
 wget https://raw.githubusercontent.com/ser1zw/todo/main/src/main/resources/sql/schema.sql
+speep 3
 podname=$(oc get pods -o custom-columns=POD:.metadata.name --no-headers -l name='todo-db')
 oc exec $podname -- psql -U postgres -c "$(cat schema.sql);"
